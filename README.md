@@ -22,4 +22,4 @@ https://tinyurl.com/2022CS229 (2022 CS229 Playlist) by Tengyu Ma
 
 ## Example Result:
 
-<img width="1134" alt="Screen Shot 2023-08-11 at 1 35 37 PM" src="https://github.com/rohitmit98/SyncBot/assets/51212933/fe2c0e42-a30f-4f79-bc68-19261ab5e1d8">
+<img width="1137" alt="image" src="https://github.com/rohitmit98/SyncBot/assets/51212933/a2920578-4e0a-4354-a53f-d82d1cb9209e">

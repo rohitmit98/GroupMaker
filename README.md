@@ -20,6 +20,6 @@ https://tinyurl.com/2018CS229 (2018 CS229 Playlist) by Andrew Ng
 https://tinyurl.com/2019CS229 (2019 CS229 Playlist) by Anand Avati 
 https://tinyurl.com/2022CS229 (2022 CS229 Playlist) by Tengyu Ma
 
-Result:
+## Example Result:
 
-<img width="1117" alt="Screen Shot 2023-08-11 at 1 33 32 PM" src="https://github.com/rohitmit98/SyncBot/assets/51212933/14df4f93-71c7-4265-b746-1229027c7d61">
+<img width="1134" alt="Screen Shot 2023-08-11 at 1 35 37 PM" src="https://github.com/rohitmit98/SyncBot/assets/51212933/fe2c0e42-a30f-4f79-bc68-19261ab5e1d8">

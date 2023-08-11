@@ -1,0 +1,17 @@
+App Name: syncbot
+
+This is the name of your application on Fly.io. If you ever need to manage or make changes to your app via the Fly.io dashboard or CLI, you'll use this name.
+
+Organization: personal
+
+This is the organization under which your app is registered. For most individual users, this will be something like personal.
+
+Admin URL: https://fly.io/apps/syncbot
+
+This URL will take you to the Fly.io dashboard for your app, where you can see metrics, logs, deployments, and other administrative details. 
+It's a good link to have bookmarked for quick access.
+
+Hostname: syncbot.fly.dev
+
+This is the default hostname provided by Fly.io for your app. Depending on the application, this might be where you can access it via the web. 
+However, for a Discord bot, you typically won't use this unless you've built in some web features or endpoints.

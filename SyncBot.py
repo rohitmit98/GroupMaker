@@ -28,21 +28,32 @@ if __name__ == "__main__":
 
     # store all intro_messages into dictionary for access 
     intro_messages = {}
-    active_learning_id = 1139164829479862324
-    role_specific_id = 1139037091733438495
+    active_group_channel = 1139164829479862324
+    role_specific_channel = 1139037091733438495
     no_notification = discord.AllowedMentions.none()
 
     @bot.command()
-    async def create(ctx, group_name: str, *, content: str = ""):
-        global active_learning_id
-        global role_specific_id
-        target_channel = ctx.guild.get_channel(active_learning_id)
+    async def create(ctx, group_type: str, group_name, *, content: str = ""):
+        global active_group_channel
+        global role_specific_channel
+        target_channel = ctx.guild.get_channel(active_group_channel)
 
         # if no content to post / accidental "enter" pressed 
-        if (not content):
-            empty_content_msg = await ctx.send("Proccess Failed. Please provide self-study content.", allowed_mentions=no_notification)
+        if (group_type != "study" or group_type != "project"):
+            empty_content_msg = await ctx.send("Process Failed. Please provide a valid group type.", allowed_mentions=no_notification)
             await ctx.message.delete(delay=5)
-            await empty_content_msg.delete(delay=5)
+            await empty_content_msg.delete(delay=10)
+
+        # if no content to post / accidental "enter" pressed 
+        elif (not group_name):
+            empty_content_msg = await ctx.send("Process Failed. Please provide a valid group name.", allowed_mentions=no_notification)
+            await ctx.message.delete(delay=5)
+            await empty_content_msg.delete(delay=10)
+        # if no content to post / accidental "enter" pressed 
+        elif (not content):
+            empty_content_msg = await ctx.send("Process Failed. Please provide group content. What are you creating?", allowed_mentions=no_notification)
+            await ctx.message.delete(delay=5)
+            await empty_content_msg.delete(delay=10)
 
         else: 
             # Check if group_name already exists, if so, append # to it 
@@ -56,14 +67,24 @@ if __name__ == "__main__":
                     counter += 1  # increment counter for next iteration if needed
                     
             # create standard learning group message 
-            intro_msg = (
-            f"## Learning Group: {group_name} \n"
-            f"Welcome to the {group_name} Learning Group! "
-            "If you're excited to join this self-study, give this a 👍 reaction. "
-            "Reacting will assign you a specific role and grant you access to our group text channel. \n\n"
-            f"{content}\n\n"
-            f"Created by User: {ctx.author.mention}"
-            )
+            if (group_type == "study"):
+                intro_msg = (
+                f"## Study Group: {group_name} \n"
+                f"Welcome to the {group_name} Study Group! "
+                "If you're excited to join this study, give this a 👍 reaction. "
+                "Reacting will assign you a specific role and grant you access to our group text channel. \n\n"
+                f"{content}\n\n"
+                f"Created by User: {ctx.author.mention}"
+                )
+            elif (group_type == "project"):
+                intro_msg = (
+                f"## Project Group: {group_name} \n"
+                f"Welcome to the {group_name} Project Group! "
+                "If you're excited to join this project, give this a 👍 reaction. "
+                "Reacting will assign you a specific role and grant you access to our group text channel. \n\n"
+                f"{content}\n\n"
+                f"Created by User: {ctx.author.mention}"
+                )
 
             # send message to #active-learning-groups channel
             intro_msg_object = await target_channel.send(content=intro_msg, embed=None)
@@ -103,7 +124,7 @@ if __name__ == "__main__":
                 await role_assign_fail.delete(delay=5)
 
             # create a new channel with group_name inside category
-            category_id = role_specific_id
+            category_id = role_specific_channel
             category = ctx.guild.get_channel(category_id)
             if not category:
                 category_fail = await ctx.send("Failed to find the category!", allowed_mentions=no_notification)
@@ -128,9 +149,9 @@ if __name__ == "__main__":
     @bot.event
     async def on_raw_reaction_add(payload):
         global intro_messages
-        global active_learning_id
+        global active_group_channel
 
-        if payload.channel_id != active_learning_id:
+        if payload.channel_id != active_group_channel:
             return 
         
         # Check if the reaction is on an intro message
@@ -149,7 +170,7 @@ if __name__ == "__main__":
 
             
             # Increment member count
-            member_count_channel = bot.get_channel(active_learning_id)
+            member_count_channel = bot.get_channel(active_group_channel)
             member_count_msg = await member_count_channel.fetch_message(member_count_id)
             current_count = int(member_count_msg.content.split()[-1])  # assuming the message ends with the count
             new_count = current_count + 1
@@ -158,10 +179,10 @@ if __name__ == "__main__":
     @bot.event
     async def on_raw_reaction_remove(payload):
         global intro_messages
-        global active_learning_id
+        global active_group_channel
 
         channel_id = payload.channel_id
-        if channel_id != active_learning_id:
+        if channel_id != active_group_channel:
             return 
 
         # Check if the reaction is on an intro message
@@ -178,7 +199,7 @@ if __name__ == "__main__":
                 await new_role_msg.delete(delay=5)
 
             # Decrement member count
-            member_count_channel = bot.get_channel(active_learning_id)
+            member_count_channel = bot.get_channel(active_group_channel)
             member_count_msg = await member_count_channel.fetch_message(member_count_id)
             current_count = int(member_count_msg.content.split()[-1])  # assuming the message ends with the count
             new_count = current_count - 1

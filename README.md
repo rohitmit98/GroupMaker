@@ -1,7 +1,8 @@
 <hr>
-Version -- SyncBot v2.0 
+Version -- GroupMaker (SyncBot v2.0)
 
 *NEW FEATURES* 
+- Rename to be have a more accurate description
 - Uses Postgresql-15 database to store pertinent information by Server.
 - Allows server admin to make a personalized !create command.
 - Allows server admin to make a !channel where a particular !create command can be used. 

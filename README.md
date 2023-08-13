@@ -4,10 +4,10 @@ Dev notes:
 - psql to initiate postgres comamnds
 - need to create tables in postgres that will store server_id, role_id, message_id, channel_is(s), and groupType, and groupName. Here is the structure:
 
-# servers Table:
+## servers Table:
 server_id: The unique ID of the Discord server.
 
-# command_channels Table:
+## command_channels Table:
 server_id: The ID of the Discord server this channel belongs to.
 channel_id: The unique ID of the channel where certain bot commands can be used.
 channel_name: Name of the channel. This is mainly for human readability and ease of management.
@@ -16,15 +16,15 @@ message_id: The unique ID of the message. This is crucial for tracking and possi
 
 NOTE: if a single channel supports multiple group types, that would indeed mean multiple rows with the same channel_id and channel_name but different group_type entries.
 
-# roles Table:
+## roles Table:
 server_id: The ID of the Discord server this role belongs to.
 role_id: The unique ID of the Discord role.
 
-# messages Table:
+## messages Table:
 server_id: The ID of the Discord server where this message was posted.
 channel_id: The channel where this message was posted.
 
-# text_channels Table:
+## text_channels Table:
 server_id: The ID of the Discord server this channel belongs to.
 channel_id: The unique ID of the text channel.
 role_id: The role ID that has access to this channel. This provides a quick reference for permissions and role-specific actions.

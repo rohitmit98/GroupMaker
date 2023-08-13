@@ -19,4 +19,3 @@ Wehn an admin uses "!channel channelName groupType" command,
 2. Users can now use !create groupType and posts will populate in that channelName 
 3. Postgres database is updated to store that channel's information and what groupType is associated with it.
 <hr>
-

@@ -1,5 +1,4 @@
-Dev notes:
-
+## Dev notes:
 - postgres running successfully on linux vm
 - psql to initiate postgres comamnds
 - need to create tables in postgres that will store server_id, role_id, message_id, channel_is(s), and groupType, and groupName. Here is the structure:
@@ -30,7 +29,7 @@ channel_id: The unique ID of the text channel.
 role_id: The role ID that has access to this channel. This provides a quick reference for permissions and role-specific actions.
 
 
-Other considerations:
+## Other considerations:
 1. Server Joins/Leaves: When your bot joins a server, you can have an initialization routine that sets up basic defaults in the database for that server. Conversely, when the bot is removed from a server, you might consider cleaning up or archiving related entries.
 
 2. Consistent Data Entry: Ensure consistency in data entry, especially when it comes to linking tables through common keys like server_id, channel_id, etc.

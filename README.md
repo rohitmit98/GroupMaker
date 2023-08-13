@@ -1,25 +1,42 @@
-# SyncBot
+Dev notes:
 
-Version -- SyncBot v1.0 
-Use the command !create groupName and let the bot handle the rest. This will:
-- Create a new role named after your group. Used to distinguish members and create sub-groups within the server. 
-- Set up a dedicated channel for the group. (Currently in a dedicated Category called "ROLE SPECIFIC CHANNELS 🔐")
-- Generate a standardized post for others to join by reacting with a 👍. (Currently in a dedicate channel called #active-learning-groups)
-- Keep track of number of members in learning group on post. 
+- postgres running successfully on linux vm
+- psql to initiate postgres comamnds
+- need to create tables in postgres that will store server_id, role_id, message_id, channel_is(s), and groupType, and groupName. Here is the structure:
 
-## Example Usage:
+# servers Table:
+server_id: The unique ID of the Discord server.
 
-!create stanfordcs229
-It would be beneficial to get a general idea of the fundamentals used in ML before getting into creating models or using algorithms even. I'll be starting this course on Monday, August 14th. I'll pace myself at roughly 1 lecture per week. Each week I’d like to review and discuss with others who join.  
+# command_channels Table:
+server_id: The ID of the Discord server this channel belongs to.
+channel_id: The unique ID of the channel where certain bot commands can be used.
+channel_name: Name of the channel. This is mainly for human readability and ease of management.
+group_type: The type of group (e.g., "study", "project") that can be created in this channel. This helps in defining context for bot commands.
+message_id: The unique ID of the message. This is crucial for tracking and possibly manipulating (e.g., deleting, editing) bot-created messages in the future.
 
-**Recommended Prerequisites:** Linear Algebra, Statistics/Probability (can be studied alongside if needed)
-**Estimated Timeframe:** 5-8 Months 
+NOTE: if a single channel supports multiple group types, that would indeed mean multiple rows with the same channel_id and channel_name but different group_type entries.
 
-📚 Intro to ML CS229 Stanford Course Options (Find detailed info in ⁠stanfordcs229 pins after you react):
-https://tinyurl.com/2018CS229 (2018 CS229 Playlist) by Andrew Ng
-https://tinyurl.com/2019CS229 (2019 CS229 Playlist) by Anand Avati 
-https://tinyurl.com/2022CS229 (2022 CS229 Playlist) by Tengyu Ma
+# roles Table:
+server_id: The ID of the Discord server this role belongs to.
+role_id: The unique ID of the Discord role.
 
-## Example Result:
+# messages Table:
+server_id: The ID of the Discord server where this message was posted.
+channel_id: The channel where this message was posted.
 
-<img width="1137" alt="image" src="https://github.com/rohitmit98/SyncBot/assets/51212933/a2920578-4e0a-4354-a53f-d82d1cb9209e">
+# text_channels Table:
+server_id: The ID of the Discord server this channel belongs to.
+channel_id: The unique ID of the text channel.
+role_id: The role ID that has access to this channel. This provides a quick reference for permissions and role-specific actions.
+
+
+Other considerations:
+1. Server Joins/Leaves: When your bot joins a server, you can have an initialization routine that sets up basic defaults in the database for that server. Conversely, when the bot is removed from a server, you might consider cleaning up or archiving related entries.
+
+2. Consistent Data Entry: Ensure consistency in data entry, especially when it comes to linking tables through common keys like server_id, channel_id, etc.
+
+3. Normalization: You've done a good job keeping the data structures normalized. This reduces data redundancy and improves data integrity. Just keep an eye out as you expand your bot's features to avoid unintentionally denormalizing your database.
+
+4. Backups & Maintenance: Always have a backup and maintenance plan for your database. It's not just about structuring data, but also about ensuring its safety and long-term sustainability.
+
+Once I have these tables set up in your database, the next step will be to integrate your bot code to interact with this database. This will involve setting up a database connection, writing queries to fetch and store data, and handling any potential database errors.

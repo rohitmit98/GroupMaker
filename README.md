@@ -1,7 +1,8 @@
 # SyncBot
 
 Version -- SyncBot v2.0 
-*NEW* 
+
+*NEW FEATURES* 
 - Uses Postgresql-15 database to store pertinent information by Server.
 - Allows server admin to make a personalized !create command.
 - Allows server admin to make a !channel where a particular !create command can be used. 

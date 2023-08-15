@@ -1,39 +1,14 @@
 import discord
 from discord.ext import commands
-from flask import Flask
-from threading import Thread
+from config import ACTIVE_GROUP_CHANNEL
 
-app = Flask(__name__)
-
-@app.route("/")
-def index():
-    return "Bot is alive!"
-
-def run():
-    app.run(host='0.0.0.0', port=8080)
-
-if __name__ == "__main__":
-    t = Thread(target=run)
-    t.start()
+class UserCog(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
 
 
-    intents = discord.Intents.default()  # This will enable all default intents
-    intents.members = True  # This will enable the members intent which is off by default
-    intents.message_content = True
-    bot = commands.Bot(command_prefix='!', intents=intents)
-
-    @bot.event
-    async def on_ready():
-        print(f'We have logged in as {bot.user.name}')
-
-    # store all intro_messages into dictionary for access 
-    intro_messages = {}
-    active_group_channel = 1139164829479862324
-    role_specific_channel = 1139037091733438495
-    no_notification = discord.AllowedMentions.none()
-
-    @bot.command()
-    async def create(ctx, group_type: str, group_name, *, content: str = ""):
+    @commands.command()
+    async def create(self, ctx, group_type: str, group_name, *, content: str = ""):
         global active_group_channel
         global role_specific_channel
         target_channel = ctx.guild.get_channel(active_group_channel)
@@ -145,66 +120,3 @@ if __name__ == "__main__":
             except discord.HTTPException as e:
                 new_channel_fail = await ctx.send(f"Failed to create channel: {e}", allowed_mentions=no_notification)
                 new_channel_fail.delete(delay=5)
-
-    @bot.event
-    async def on_raw_reaction_add(payload):
-        global intro_messages
-        global active_group_channel
-
-        if payload.channel_id != active_group_channel:
-            return 
-        
-        # Check if the reaction is on an intro message
-        channel = bot.get_channel(payload.channel_id)
-        group_name, member_count_id = intro_messages.get(payload.message_id, (None, None))
-        if group_name and payload.emoji.name == "👍":
-            guild = bot.get_guild(payload.guild_id)
-            user = guild.get_member(payload.user_id)
-
-            role = discord.utils.get(guild.roles, name=group_name)
-            if role:
-                await user.add_roles(role)
-                new_role_msg = await channel.send(f"{user.mention} has been successfully assigned role {role}!", allowed_mentions=no_notification)
-                await new_role_msg.delete(delay=5)
-
-
-            
-            # Increment member count
-            member_count_channel = bot.get_channel(active_group_channel)
-            member_count_msg = await member_count_channel.fetch_message(member_count_id)
-            current_count = int(member_count_msg.content.split()[-1])  # assuming the message ends with the count
-            new_count = current_count + 1
-            await member_count_msg.edit(content=f"👥 **Current Member Count:** {new_count}")
-
-    @bot.event
-    async def on_raw_reaction_remove(payload):
-        global intro_messages
-        global active_group_channel
-
-        channel_id = payload.channel_id
-        if channel_id != active_group_channel:
-            return 
-
-        # Check if the reaction is on an intro message
-        channel = bot.get_channel(payload.channel_id)
-        group_name, member_count_id = intro_messages.get(payload.message_id, (None, None))
-        if group_name and payload.emoji.name == "👍":
-            guild = bot.get_guild(payload.guild_id)
-            user = guild.get_member(payload.user_id)
-
-            role = discord.utils.get(guild.roles, name=group_name)
-            if role:
-                await user.remove_roles(role)
-                new_role_msg = await channel.send(f"{user.mention} has been successfully removed role {role}!", allowed_mentions=no_notification)
-                await new_role_msg.delete(delay=5)
-
-            # Decrement member count
-            member_count_channel = bot.get_channel(active_group_channel)
-            member_count_msg = await member_count_channel.fetch_message(member_count_id)
-            current_count = int(member_count_msg.content.split()[-1])  # assuming the message ends with the count
-            new_count = current_count - 1
-            await member_count_msg.edit(content=f"👥 **Current Member Count:** {new_count}")
-
-    bot.run('MTEzOTUxOTA1MDM1NjExNzU2NQ.G_yuUr.AZex8N-RF4joZBM8joSjpjS4VRlDMK5T-m3es8')  
-
-    # Current Token: MTEzOTUxOTA1MDM1NjExNzU2NQ.G_yuUr.AZex8N-RF4joZBM8joSjpjS4VRlDMK5T-m3es8

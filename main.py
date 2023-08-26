@@ -1,107 +1,56 @@
 import discord
-from discord.ext import commands
-from flask import Flask
-from threading import Thread
-import psycopg2
-from config import BOT_TOKEN 
+from discord.ext import bridge
+from database.connect import db_pool
+from discordToken import BOT_TOKEN
 
-conn = psycopg2.connect(
-    dbname="groupmakerdb",
-    user="username",
-    password="password",
-    host="150.136.87.39",
-    port="5432"  # default port for Postgres, change if yours is different
-)
-
-app = Flask(__name__)
-
-@app.route("/")
-def index():
-    return "Bot is alive!"
-
-def run():
-    app.run(host='0.0.0.0', port=8080)
-
-if __name__ == "__main__":
-    t = Thread(target=run)
-    t.start()
-
-    intents = discord.Intents.default()  # This will enable all default intents
-    intents.members = True  # This will enable the members intent which is off by default
-    intents.message_content = True
-    bot = commands.Bot(command_prefix='!', intents=intents)
-
-    @bot.event
-    async def on_ready():
-        print(f'We have logged in as {bot.user.name}')
-    async def on_ready():
-        await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="!help for commands"))
-        print(f'We have logged in as {bot.user.name}')
-
-    # store all intro_messages into dictionary for access 
-    intro_messages = {}
-    active_group_channel = 1139164829479862324
-    role_specific_channel = 1139037091733438495
-    no_notification = discord.AllowedMentions.none()
+bot = bridge.Bot(command_prefix='!', intents=discord.Intents.all(), auto_sync_commands=True)
 
 
-    @bot.event
-    async def on_raw_reaction_add(payload):
-        global intro_messages
-        global active_group_channel
-
-        if payload.channel_id != active_group_channel:
-            return 
-        
-        # Check if the reaction is on an intro message
-        channel = bot.get_channel(payload.channel_id)
-        group_name, member_count_id = intro_messages.get(payload.message_id, (None, None))
-        if group_name and payload.emoji.name == "👍":
-            guild = bot.get_guild(payload.guild_id)
-            user = guild.get_member(payload.user_id)
-
-            role = discord.utils.get(guild.roles, name=group_name)
-            if role:
-                await user.add_roles(role)
-                new_role_msg = await channel.send(f"{user.mention} has been successfully assigned role {role}!", allowed_mentions=no_notification)
-                await new_role_msg.delete(delay=5)
+# Function to insert guild_id, and timestamp for joined into 'servers' Table
+def insert_server_data(guild_id: int):
+    conn = db_pool.getconn()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO guilds (guild_id, join_date) VALUES (%s, CURRENT_TIMESTAMP) ON CONFLICT DO NOTHING;",
+                (guild_id,))
+            conn.commit()
+    finally:
+        db_pool.putconn(conn)
 
 
-            
-            # Increment member count
-            member_count_channel = bot.get_channel(active_group_channel)
-            member_count_msg = await member_count_channel.fetch_message(member_count_id)
-            current_count = int(member_count_msg.content.split()[-1])  # assuming the message ends with the count
-            new_count = current_count + 1
-            await member_count_msg.edit(content=f"👥 **Current Member Count:** {new_count}")
+def delete_server_data(guild_id: int):
+    conn = db_pool.getconn()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("DELETE FROM guilds WHERE guild_id = %s;", (guild_id,))
+            conn.commit()
+    finally:
+        db_pool.putconn(conn)
 
-    @bot.event
-    async def on_raw_reaction_remove(payload):
-        global intro_messages
-        global active_group_channel
 
-        channel_id = payload.channel_id
-        if channel_id != active_group_channel:
-            return 
+@bot.event
+async def on_ready():
+    print(f"Ready - this bot is owned by {bot.user}")
 
-        # Check if the reaction is on an intro message
-        channel = bot.get_channel(payload.channel_id)
-        group_name, member_count_id = intro_messages.get(payload.message_id, (None, None))
-        if group_name and payload.emoji.name == "👍":
-            guild = bot.get_guild(payload.guild_id)
-            user = guild.get_member(payload.user_id)
 
-            role = discord.utils.get(guild.roles, name=group_name)
-            if role:
-                await user.remove_roles(role)
-                new_role_msg = await channel.send(f"{user.mention} has been successfully removed role {role}!", allowed_mentions=no_notification)
-                await new_role_msg.delete(delay=5)
+@bot.event
+async def on_guild_join(guild):
+    # print(f"Guild joined: {guild.name}")
+    insert_server_data(guild.id)
 
-            # Decrement member count
-            member_count_channel = bot.get_channel(active_group_channel)
-            member_count_msg = await member_count_channel.fetch_message(member_count_id)
-            current_count = int(member_count_msg.content.split()[-1])  # assuming the message ends with the count
-            new_count = current_count - 1
-            await member_count_msg.edit(content=f"👥 **Current Member Count:** {new_count}")
 
-    bot.run(BOT_TOKEN)  
+@bot.event
+async def on_guild_remove(guild):
+    # print(f"Guild left: {guild.name}")
+    delete_server_data(guild.id)
+
+
+async def main():
+    bot.load_extension("cogs.create_command")
+    bot.load_extension("cogs.disband_command")
+    await bot.start(BOT_TOKEN)
+
+
+loop = bot.loop
+loop.run_until_complete(main())

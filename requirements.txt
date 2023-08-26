@@ -1,2 +1,3 @@
-discord.py
-flask
+emoji>=2.8.0
+py-cord
+psycopg2>=2.9.7

@@ -5,7 +5,7 @@ from database.queries import add_category
 import emoji
 
 
-class CreateAdminOnlyCommands(commands.Cog):
+class CreateCommand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -32,7 +32,7 @@ class CreateAdminOnlyCommands(commands.Cog):
         required=True
     )
     @option(
-        name="admin_msg",
+        name="admin-msg",
         parameter_name="admin_msg",
         description="Do you have a message you'd like to include for posts with this category? default=\"\"",
         required=False
@@ -76,11 +76,11 @@ class CreateAdminOnlyCommands(commands.Cog):
             await ctx.defer()
 
             response_message = (f"Successfully added group category **\"{new_category}\"** in Server.\n\n"
-                                f"**Group formations for this category will post in channel:** <#{new_channel.id}>\n\n"
+                                f"**Group myformations for this category will post in channel:** <#{new_channel.id}>\n\n"
                                 f"{'**Standard admin message for every post:** ' + admin_msg if admin_msg.strip() != '' else ''}")
 
         await ctx.respond(response_message, ephemeral=not public_bool)
 
 
 def setup(bot):
-    bot.add_cog(CreateAdminOnlyCommands(bot))
+    bot.add_cog(CreateCommand(bot))

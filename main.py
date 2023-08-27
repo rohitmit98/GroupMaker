@@ -1,32 +1,9 @@
 import discord
 from discord.ext import bridge
-from database.connect import db_pool
 from discordToken import BOT_TOKEN
+from database.queries import insert_server_data, delete_server_data
 
 bot = bridge.Bot(command_prefix='!', intents=discord.Intents.all(), auto_sync_commands=True)
-
-
-# Function to insert guild_id, and timestamp for joined into 'servers' Table
-def insert_server_data(guild_id: int):
-    conn = db_pool.getconn()
-    try:
-        with conn.cursor() as cursor:
-            cursor.execute(
-                "INSERT INTO guilds (guild_id, join_date) VALUES (%s, CURRENT_TIMESTAMP) ON CONFLICT DO NOTHING;",
-                (guild_id,))
-            conn.commit()
-    finally:
-        db_pool.putconn(conn)
-
-
-def delete_server_data(guild_id: int):
-    conn = db_pool.getconn()
-    try:
-        with conn.cursor() as cursor:
-            cursor.execute("DELETE FROM guilds WHERE guild_id = %s;", (guild_id,))
-            conn.commit()
-    finally:
-        db_pool.putconn(conn)
 
 
 @bot.event

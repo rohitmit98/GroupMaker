@@ -4,7 +4,7 @@ from database.queries import add_group, get_category_names_autocomplete, get_cat
 
 
 # @commands.has_permissions(administrator=True)
-class CreateAdminOnlyCommands(commands.Cog):
+class FormCommand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 

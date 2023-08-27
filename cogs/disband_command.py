@@ -5,7 +5,7 @@ from discord.ext import bridge, commands
 from database.queries import remove_category, get_category_id_from_name, get_category_names_autocomplete
 
 
-class DisbandAdminOnlyCommands(commands.Cog):
+class DisbandCommand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -24,7 +24,8 @@ class DisbandAdminOnlyCommands(commands.Cog):
         required=True
     )
     async def category(self, ctx: bridge.BridgeContext, category_name: str):
-        category_str = category_name.split(" ")[0]
+        category_str = category_name[:-2]
+
         category_id = await get_category_id_from_name(ctx.guild.id, category_str)
 
         # Create the confirmation view with buttons
@@ -73,4 +74,4 @@ class ConfirmationButton(ui.View):
 
 
 def setup(bot):
-    bot.add_cog(DisbandAdminOnlyCommands(bot))
+    bot.add_cog(DisbandCommand(bot))
